@@ -1,0 +1,52 @@
+{
+    "name": "consolidation/ci",
+    "description": "A tool for using CI tools",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Greg Anderson",
+            "email": "greg.1.anderson@greenknowe.org"
+        }
+    ],
+    "autoload":{
+        "psr-4":{
+            "CI\\":"src"
+        }
+    },
+    "autoload-dev":{
+        "psr-4":{
+            "CI\\":"tests/src"
+        }
+    },
+    "bin":["ci"],
+    "require": {
+        "php": ">=5.6.0",
+        "consolidation/Robo": "^1"
+    },
+    "require-dev": {
+        "phpunit/php-code-coverage": "~2|~4",
+        "squizlabs/php_codesniffer": "^2.8"
+    },
+    "scripts": {
+        "cs": "phpcs --standard=PSR2 -n src",
+        "cbf": "phpcbf --standard=PSR2 -n src",
+        "unit": "SHELL_INTERACTIVE=true phpunit --colors=always",
+        "test": [
+            "@unit",
+            "@cs"
+        ]
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "preferred-install": "dist",
+        "sort-packages": true,
+        "platform": {
+            "php": "5.6"
+        }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.x-dev"
+        }
+    }
+}
