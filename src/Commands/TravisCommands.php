@@ -36,8 +36,25 @@ class TravisCommands
         $result = implode("\n", $withComments);
         file_put_contents($travisConfigPath, $result);
 
+        $this->setEnvironment();
+    }
+
+    protected function setEnvironment()
+    {
+        exec('which travis', $outputOfWhich, $return_code);
+        if ($return_code) {
+            // TODO: warn the user that `travis` tool is not available
+            return;
+        }
         // TODO: If $GITHUB_TOKEN is defined, then run
         // `travis env set GITHUB_TOKEN $GITHUB_TOKEN`
+        $github_token = getenv('GITHUB_TOKEN');
+        if (!$github_token) {
+            // TODO: warn the user that GITHUB_TOKEN is not defined
+            return;
+        }
+
+        passthru('travis env set GITHUB_TOKEN ' . $github_token);
     }
 
     protected function hasCLUConfig($travisContents)
@@ -76,8 +93,7 @@ class TravisCommands
 
     protected function combineConfig($mainConfig, $injectedConfig)
     {
-        foreach ($injectedConfig as $section => $injectedContents)
-        {
+        foreach ($injectedConfig as $section => $injectedContents) {
             if (!isset($mainConfig[$section])) {
                 $mainConfig[$section] = $injectedContents;
             } else {
