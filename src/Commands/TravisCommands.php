@@ -13,16 +13,21 @@ class TravisCommands
      *
      * @command travis:clu
      */
-    public function travisComposerLockUpdate()
+    public function travisComposerLockUpdate($options = ['auto-merge' => false])
     {
+        // TODO: Sanity checks
+        // - There must be a composer.json
+        // - The composer.lock file must not be in the .gitignore file
         $travisConfigPath = '.travis.yml';
         $travisContents = $this->readTravisConfig($travisConfigPath);
 
+        // TODO: Should we allow folks to turn on auto-update if they
+        // previously configured their project without it?
         if ($this->hasCLUConfig($travisContents)) {
             throw new \Exception("Composer Lock Update already configured in " . $travisConfigPath);
         }
 
-        $alteredContents = $this->configureCLU($travisContents);
+        $alteredContents = $this->configureCLU($travisContents, $options['auto-merge']);
 
         $commentManager = new Comments();
         $commentManager->collect(explode("\n", $travisContents));
@@ -30,6 +35,9 @@ class TravisCommands
 
         $result = implode("\n", $withComments);
         file_put_contents($travisConfigPath, $result);
+
+        // TODO: If $GITHUB_TOKEN is defined, then run
+        // `travis env set GITHUB_TOKEN $GITHUB_TOKEN`
     }
 
     protected function hasCLUConfig($travisContents)
@@ -48,13 +56,17 @@ class TravisCommands
         return file_get_contents($travisConfigPath);
     }
 
-    protected function configureCLU($travisContents)
+    protected function configureCLU($travisContents, $auto_merge)
     {
-        $cluConfigContents = $this->getTemplate('clu-travis.yml');
+        $template_name = $auto_merge ? 'clu-automerge-travis.yml' : 'clu-travis.yml';
+        $cluConfigContents = $this->getTemplate($template_name);
         $cluConfig = Yaml::parse($cluConfigContents);
         $travisConfig = Yaml::parse($travisContents);
 
         $travisConfig = $this->combineConfig($travisConfig, $cluConfig);
+
+        // TODO: Add DO_POST_BUILD_ACTIONS to the first matrix: include: php: section
+        // TODO: Fail if there is no matrix: include: section (or fix it - but probably fail)
 
         $combinedContents = Yaml::dump($travisConfig, PHP_INT_MAX, 2, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK);
         $travisContents = $combinedContents;

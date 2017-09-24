@@ -8,31 +8,6 @@ after_success:
       echo "No GITHUB_TOKEN defined; exiting."
       return
     fi
-    # Inject GITHUB_TOKEN into remote origin so that we have push access
-    # to merge or create a pull request
-    remote=$(git config --get remote.origin.url)
-    git remote set-url origin "${remote/github.com/$GITHUB_TOKEN:x-oauth-basic@github.com}"
-    # If this is a PR that merges into the master branch, then try to merge it if it contains only composer.lock
-    # n.b. TRAVIS_BRANCH is the branch the pull request will merge into. TRAVIS_PULL_REQUEST_BRANCH
-    # is the branch that holds the commits for the pull request.
-    if [ -n "$TRAVIS_COMMIT_RANGE" ] && [ -n "$TRAVIS_PULL_REQUEST_BRANCH" ] && [ "master" == "$TRAVIS_BRANCH" ]; then
-      changed_files=$(git diff --name-status "$TRAVIS_COMMIT_RANGE" | tr '\t' ' ')
-      if [[ "$changed_files" == "M composer.lock" ]] ; then
-        (
-          echo "Only composer.lock was modified: auto-merging to $TRAVIS_BRANCH in repository $remote."
-          git status
-          git reset "$TRAVIS_BRANCH"
-          git stash
-          git checkout "$TRAVIS_BRANCH"
-          git stash pop
-          git add composer.lock
-          git commit -m "Auto-update dependencies in composer.lock from PR #$TRAVIS_PULL_REQUEST (https://github.com/$TRAVIS_REPO_SLUG/pull/$TRAVIS_PULL_REQUEST)."
-          git push origin "$TRAVIS_BRANCH"
-        ) 2>&1 | sed -e "s/$GITHUB_TOKEN/REDACTED/g"
-      else
-        echo "Not auto-merging, because multiple files were changed"
-      fi
-    fi
     ###
     # Run composer lock update on cron jobs.
     # See: https://github.com/danielbachhuber/composer-lock-updater
