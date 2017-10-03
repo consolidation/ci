@@ -36,6 +36,8 @@ class TravisCommands
         $result = implode("\n", $withComments);
         file_put_contents($travisConfigPath, $result);
 
+        // TODO: should we push and 'travis enable' automatically?
+
         $this->setEnvironment();
     }
 
