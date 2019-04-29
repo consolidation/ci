@@ -2,7 +2,7 @@
 
 namespace CI\Commands;
 
-use CI\Utils\Comments;
+use Consolidation\Comments\Comments;
 use Symfony\Component\Yaml\Yaml;
 
 class TravisCommands
