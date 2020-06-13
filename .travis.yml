@@ -2,9 +2,9 @@ dist: trusty
 language: php
 
 branches:
-  # Only test the master branch and SemVer tags.
+  # Only test the main branch and SemVer tags.
   only:
-    - master
+    - main
     - '/^[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+.*$/'
 
 matrix:
@@ -48,10 +48,10 @@ after_success:
     # to merge or create a pull request
     remote=$(git config --get remote.origin.url)
     git remote set-url origin "${remote/github.com/$GITHUB_TOKEN:x-oauth-basic@github.com}"
-    # If this is a PR that merges into the master branch, then try to merge it if it contains only composer.lock
+    # If this is a PR that merges into the main branch, then try to merge it if it contains only composer.lock
     # n.b. TRAVIS_BRANCH is the branch the pull request will merge into. TRAVIS_PULL_REQUEST_BRANCH
     # is the branch that holds the commits for the pull request.
-    if [ -n "$TRAVIS_COMMIT_RANGE" ] && [ -n "$TRAVIS_PULL_REQUEST_BRANCH" ] && [ "master" == "$TRAVIS_BRANCH" ]; then
+    if [ -n "$TRAVIS_COMMIT_RANGE" ] && [ -n "$TRAVIS_PULL_REQUEST_BRANCH" ] && [ "main" == "$TRAVIS_BRANCH" ]; then
       changed_files=$(git diff --name-status "$TRAVIS_COMMIT_RANGE" | tr '\t' ' ')
       if [[ "$changed_files" == "M composer.lock" ]] ; then
         (
@@ -78,10 +78,10 @@ after_success:
       return
     fi
     ###
-    # Only run on one job of a master branch build
+    # Only run on one job of a main branch build
     ###
-    if [ "master" != "$TRAVIS_BRANCH" ] ; then
-      echo "composer.lock update only runs on the master branch."
+    if [ "main" != "$TRAVIS_BRANCH" ] ; then
+      echo "composer.lock update only runs on the main branch."
       return
     fi
     ###
